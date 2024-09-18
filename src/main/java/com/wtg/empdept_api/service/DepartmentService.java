@@ -11,7 +11,7 @@ import java.util.List;
 public class DepartmentService {
 
     @Autowired
-    DepartmentRepository departmentRepository;
+    private DepartmentRepository departmentRepository;
 
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
