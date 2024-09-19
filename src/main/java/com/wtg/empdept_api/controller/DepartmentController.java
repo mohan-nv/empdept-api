@@ -20,8 +20,8 @@ public class DepartmentController {
         return departmentService.createDepartment(department);
     }
 
-    @GetMapping
-    public Department getDepartment(@RequestParam @NotNull Long id) {
+    @GetMapping("/{id}")
+    public Department getDepartment(@PathVariable @NotNull Long id) {
         return departmentService.getDepartmentById(id);
     }
 
@@ -30,12 +30,12 @@ public class DepartmentController {
         return departmentService.updateDepartment(department);
     }
 
-    @DeleteMapping
-    public Boolean deleteDepartment(@RequestParam @NotNull Long id) {
+    @DeleteMapping("/{id}")
+    public Boolean deleteDepartment(@PathVariable @NotNull Long id) {
         return departmentService.deleteDepartment(id);
     }
 
-    @GetMapping(path = "/all")
+    @GetMapping
     public List<Department> getDepartments() {
         return departmentService.getAllDepartments();
     }
