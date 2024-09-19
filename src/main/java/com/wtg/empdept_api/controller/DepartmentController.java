@@ -2,7 +2,6 @@ package com.wtg.empdept_api.controller;
 
 import com.wtg.empdept_api.dao.entity.Department;
 import com.wtg.empdept_api.service.interfaces.IDepartmentService;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,7 @@ public class DepartmentController {
     private IDepartmentService departmentService;
 
     @PostMapping
-    public Department createDepartment(@RequestBody @Valid @NotNull Department department) {
+    public Department createDepartment(@RequestBody @NotNull Department department) {
         return departmentService.createDepartment(department);
     }
 
@@ -27,7 +26,7 @@ public class DepartmentController {
     }
 
     @PutMapping
-    public Department updateDepartment(@RequestBody @Valid @NotNull Department department) {
+    public Department updateDepartment(@RequestBody @NotNull Department department) {
         return departmentService.updateDepartment(department);
     }
 
