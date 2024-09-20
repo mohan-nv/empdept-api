@@ -1,4 +1,4 @@
-package com.wtg.empdept_api.controller.exception;
+package com.wtg.mohanbootcamp.api;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;

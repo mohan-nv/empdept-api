@@ -1,6 +1,6 @@
-package com.wtg.empdept_api.service.interfaces;
+package com.wtg.mohanbootcamp.service;
 
-import com.wtg.empdept_api.dao.entity.Department;
+import com.wtg.mohanbootcamp.persistence.entity.Department;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 

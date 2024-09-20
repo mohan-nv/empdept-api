@@ -1,4 +1,4 @@
-package com.wtg.empdept_api.dao.entity;
+package com.wtg.mohanbootcamp.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

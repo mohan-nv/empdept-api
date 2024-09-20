@@ -1,4 +1,4 @@
-package com.wtg.empdept_api;
+package com.wtg.mohanbootcamp;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

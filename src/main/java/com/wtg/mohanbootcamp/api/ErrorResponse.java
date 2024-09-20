@@ -1,4 +1,4 @@
-package com.wtg.empdept_api.controller.exception;
+package com.wtg.mohanbootcamp.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

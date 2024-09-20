@@ -1,9 +1,8 @@
-package com.wtg.empdept_api.service;
+package com.wtg.mohanbootcamp.service;
 
-import com.wtg.empdept_api.dao.entity.Department;
-import com.wtg.empdept_api.dao.entity.Employee;
-import com.wtg.empdept_api.dao.repository.DepartmentRepository;
-import com.wtg.empdept_api.service.interfaces.IDepartmentService;
+import com.wtg.mohanbootcamp.persistence.entity.Department;
+import com.wtg.mohanbootcamp.persistence.entity.Employee;
+import com.wtg.mohanbootcamp.persistence.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;

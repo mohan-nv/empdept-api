@@ -1,7 +1,7 @@
-package com.wtg.empdept_api.controller;
+package com.wtg.mohanbootcamp.api;
 
-import com.wtg.empdept_api.dao.entity.Department;
-import com.wtg.empdept_api.service.interfaces.IDepartmentService;
+import com.wtg.mohanbootcamp.persistence.entity.Department;
+import com.wtg.mohanbootcamp.service.IDepartmentService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

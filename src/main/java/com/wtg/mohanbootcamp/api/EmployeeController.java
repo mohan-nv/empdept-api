@@ -1,7 +1,7 @@
-package com.wtg.empdept_api.controller;
+package com.wtg.mohanbootcamp.api;
 
-import com.wtg.empdept_api.dao.entity.Employee;
-import com.wtg.empdept_api.service.interfaces.IEmployeeService;
+import com.wtg.mohanbootcamp.persistence.entity.Employee;
+import com.wtg.mohanbootcamp.service.IEmployeeService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

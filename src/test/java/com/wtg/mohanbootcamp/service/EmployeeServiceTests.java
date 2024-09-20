@@ -1,8 +1,8 @@
-package com.wtg.empdept_api.service;
+package com.wtg.mohanbootcamp.service;
 
-import com.wtg.empdept_api.dao.entity.Employee;
-import com.wtg.empdept_api.dao.repository.DepartmentRepository;
-import com.wtg.empdept_api.dao.repository.EmployeeRepository;
+import com.wtg.mohanbootcamp.persistence.entity.Employee;
+import com.wtg.mohanbootcamp.persistence.repository.DepartmentRepository;
+import com.wtg.mohanbootcamp.persistence.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

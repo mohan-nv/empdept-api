@@ -1,6 +1,6 @@
-package com.wtg.empdept_api.service.interfaces;
+package com.wtg.mohanbootcamp.service;
 
-import com.wtg.empdept_api.dao.entity.Employee;
+import com.wtg.mohanbootcamp.persistence.entity.Employee;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.security.InvalidParameterException;

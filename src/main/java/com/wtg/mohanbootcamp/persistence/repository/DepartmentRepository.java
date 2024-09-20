@@ -1,6 +1,6 @@
-package com.wtg.empdept_api.dao.repository;
+package com.wtg.mohanbootcamp.persistence.repository;
 
-import com.wtg.empdept_api.dao.entity.Department;
+import com.wtg.mohanbootcamp.persistence.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
