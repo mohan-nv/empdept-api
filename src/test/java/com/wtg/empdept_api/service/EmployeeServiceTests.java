@@ -1,6 +1,7 @@
 package com.wtg.empdept_api.service;
 
 import com.wtg.empdept_api.dao.entity.Employee;
+import com.wtg.empdept_api.dao.repository.DepartmentRepository;
 import com.wtg.empdept_api.dao.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,15 +19,18 @@ public class EmployeeServiceTests {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock
+    private DepartmentRepository departmentRepository;
+
     @InjectMocks
     private EmployeeService employeeService;
 
-    public EmployeeServiceTests(){
+    public EmployeeServiceTests() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testGetAllEmployees(){
+    void testGetAllEmployees() {
         // Arrange
         Employee employee1 = new Employee();
         employee1.setId(1L);

@@ -1,6 +1,7 @@
 package com.wtg.empdept_api.service;
 
 import com.wtg.empdept_api.dao.entity.Department;
+import com.wtg.empdept_api.dao.entity.Employee;
 import com.wtg.empdept_api.dao.repository.DepartmentRepository;
 import com.wtg.empdept_api.service.interfaces.IDepartmentService;
 import jakarta.persistence.EntityNotFoundException;
@@ -75,6 +76,10 @@ public class DepartmentService implements IDepartmentService {
 
         if (Boolean.TRUE.equals(department.getReadOnly())) {
             throw new UnsupportedOperationException("Cannot delete a readonly department");
+        }
+
+        for (Employee employee : department.getEmployees()) {
+            employee.getDepartments().remove(department);
         }
 
         departmentRepository.deleteById(id);

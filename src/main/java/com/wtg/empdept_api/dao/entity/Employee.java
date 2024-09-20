@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "EMPLOYEE")
 @Getter
@@ -21,4 +24,12 @@ public class Employee {
 
     @Column(name = "NAME_LAST", nullable = false)
     private String nameLast;
+
+    @ManyToMany
+    @JoinTable(
+            name = "MAP_EMPLOYEE_DEPARTMENT",
+            joinColumns = @JoinColumn(name = "ID_EMPLOYEE"),
+            inverseJoinColumns = @JoinColumn(name = "ID_DEPARTMENT")
+    )
+    private Set<Department> departments = new HashSet<>();
 }
