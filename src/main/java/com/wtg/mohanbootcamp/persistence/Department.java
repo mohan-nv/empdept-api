@@ -1,4 +1,4 @@
-package com.wtg.mohanbootcamp.persistence.entity;
+package com.wtg.mohanbootcamp.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

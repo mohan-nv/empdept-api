@@ -1,6 +1,5 @@
-package com.wtg.mohanbootcamp.persistence.repository;
+package com.wtg.mohanbootcamp.persistence;
 
-import com.wtg.mohanbootcamp.persistence.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package com.wtg.mohanbootcamp.service;
 
-import com.wtg.mohanbootcamp.persistence.entity.Department;
-import com.wtg.mohanbootcamp.persistence.repository.DepartmentRepository;
+import com.wtg.mohanbootcamp.persistence.Department;
+import com.wtg.mohanbootcamp.persistence.DepartmentRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,14 +13,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DepartmentServiceTests {
+public class DepartmentServiceImplTests {
     @Mock
     private DepartmentRepository departmentRepository;
 
     @InjectMocks
-    private DepartmentService departmentService;
+    private DepartmentServiceImpl departmentService;
 
-    public DepartmentServiceTests() {
+    public DepartmentServiceImplTests() {
         MockitoAnnotations.openMocks(this);
     }
 

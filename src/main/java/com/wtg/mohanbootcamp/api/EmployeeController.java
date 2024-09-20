@@ -1,7 +1,7 @@
 package com.wtg.mohanbootcamp.api;
 
-import com.wtg.mohanbootcamp.persistence.entity.Employee;
-import com.wtg.mohanbootcamp.service.IEmployeeService;
+import com.wtg.mohanbootcamp.persistence.Employee;
+import com.wtg.mohanbootcamp.service.EmployeeService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeController {
 
-    private final IEmployeeService employeeService;
+    private final EmployeeService employeeService;
 
     @PostMapping
     public Employee createEmployee(@RequestBody @NotNull Employee employee) {

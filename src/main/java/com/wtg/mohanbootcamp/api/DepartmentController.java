@@ -1,7 +1,7 @@
 package com.wtg.mohanbootcamp.api;
 
-import com.wtg.mohanbootcamp.persistence.entity.Department;
-import com.wtg.mohanbootcamp.service.IDepartmentService;
+import com.wtg.mohanbootcamp.persistence.Department;
+import com.wtg.mohanbootcamp.service.DepartmentService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepartmentController {
 
-    private final IDepartmentService departmentService;
+    private final DepartmentService departmentService;
 
     @PostMapping
     public Department createDepartment(@RequestBody @NotNull Department department) {

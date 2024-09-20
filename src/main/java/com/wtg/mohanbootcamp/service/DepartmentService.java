@@ -1,87 +1,21 @@
 package com.wtg.mohanbootcamp.service;
 
-import com.wtg.mohanbootcamp.persistence.entity.Department;
-import com.wtg.mohanbootcamp.persistence.entity.Employee;
-import com.wtg.mohanbootcamp.persistence.repository.DepartmentRepository;
+import com.wtg.mohanbootcamp.persistence.Department;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class DepartmentService implements IDepartmentService {
+public interface DepartmentService {
 
-    private final DepartmentRepository departmentRepository;
+    List<Department> getAllDepartments();
 
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
-    }
+    Department createDepartment(Department department) throws UnsupportedOperationException, InvalidParameterException, DuplicateKeyException;
 
-    @Override
-    public Department createDepartment(Department department) throws UnsupportedOperationException, InvalidParameterException, DuplicateKeyException {
-        if (department.getId() != null) {
-            throw new UnsupportedOperationException("Please use update department if id already exist");
-        }
-        if (department.getName() == null || department.getName().isEmpty()) {
-            throw new InvalidParameterException("Department Name can't be null or empty");
-        }
-        if (department.getReadOnly() == null) {
-            department.setReadOnly(Boolean.FALSE);
-        }
+    Department getDepartmentById(Long id) throws EntityNotFoundException;
 
-        try {
-            return departmentRepository.save(department);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateKeyException("Department Name should be unique");
-        }
-    }
+    Department updateDepartment(Department departmentRequest) throws EntityNotFoundException, UnsupportedOperationException;
 
-    @Override
-    public Department getDepartmentById(Long id) throws EntityNotFoundException {
-        return departmentRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Department Not Found"));
-    }
-
-    @Override
-    public Department updateDepartment(Department departmentRequest) throws EntityNotFoundException, UnsupportedOperationException {
-        Department existingDepartment = getDepartmentById(departmentRequest.getId());
-
-        if (existingDepartment.getReadOnly() && departmentRequest.getReadOnly() == null) {
-            throw new UnsupportedOperationException("Cannot modify a readonly department");
-        }
-
-        if (departmentRequest.getReadOnly() == null) {
-            departmentRequest.setReadOnly(Boolean.FALSE);
-        }
-
-        if (departmentRequest.getReadOnly() && existingDepartment.getReadOnly()) {
-            throw new UnsupportedOperationException("Cannot modify a readonly department");
-        }
-
-        try {
-            return departmentRepository.save(departmentRequest);
-        } catch (DataIntegrityViolationException e) {
-            throw new DuplicateKeyException("Department Name should be unique");
-        }
-    }
-
-    @Override
-    public Boolean deleteDepartment(Long id) throws EntityNotFoundException, UnsupportedOperationException {
-        Department department = getDepartmentById(id);
-
-        if (Boolean.TRUE.equals(department.getReadOnly())) {
-            throw new UnsupportedOperationException("Cannot delete a readonly department");
-        }
-
-        for (Employee employee : department.getEmployees()) {
-            employee.getDepartments().remove(department);
-        }
-
-        departmentRepository.deleteById(id);
-        return Boolean.TRUE;
-    }
+    Boolean deleteDepartment(Long id) throws EntityNotFoundException, UnsupportedOperationException;
 }

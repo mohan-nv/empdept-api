@@ -1,4 +1,4 @@
-package com.wtg.mohanbootcamp.persistence.entity;
+package com.wtg.mohanbootcamp.persistence;
 
 import jakarta.persistence.*;
 import lombok.Getter;
