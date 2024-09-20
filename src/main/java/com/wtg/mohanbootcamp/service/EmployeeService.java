@@ -50,10 +50,11 @@ public class EmployeeService implements IEmployeeService {
     @Override
     public Employee updateEmployee(Employee employeeRequest) throws EntityNotFoundException, InvalidParameterException {
         validateEmployeeNames(employeeRequest);
-        validateEmployeeExist(employeeRequest.getId());
+
+        Employee existingEmployee = getEmployeeById(employeeRequest.getId());
         validateDepartmentIds(employeeRequest.getDepartments());
 
-        addMandatoryDepartments(employeeRequest);
+        addMandatoryDepartmentsForUpdate(employeeRequest, existingEmployee);
 
         return employeeRepository.save(employeeRequest);
     }
@@ -104,6 +105,23 @@ public class EmployeeService implements IEmployeeService {
         for (Department mandatoryDepartment : mandatoryDepartmentList) {
             if (!requestDepartmentIdList.contains(mandatoryDepartment.getId())) {
                 employee.getDepartments().add(mandatoryDepartment);
+            }
+        }
+    }
+
+    private void addMandatoryDepartmentsForUpdate(Employee newEmployee, Employee oldEmployee) {
+        List<Department> mandatoryDepartmentList = departmentRepository.findByMandatory(Boolean.TRUE);
+        Set<Department> oldDepartments = oldEmployee.getDepartments();
+        Set<Department> oldDepartmentsToRetain = mandatoryDepartmentList.stream().filter(oldDepartments::contains).collect(Collectors.toSet());
+
+        if (newEmployee.getDepartments() == null) {
+            newEmployee.setDepartments(new HashSet<>());
+        }
+
+        Set<Long> requestDepartmentIdList = newEmployee.getDepartments().stream().map(Department::getId).collect(Collectors.toSet());
+        for (Department mandatoryDepartment : oldDepartmentsToRetain) {
+            if (!requestDepartmentIdList.contains(mandatoryDepartment.getId())) {
+                newEmployee.getDepartments().add(mandatoryDepartment);
             }
         }
     }
