@@ -3,17 +3,17 @@ package com.wtg.empdept_api.controller;
 import com.wtg.empdept_api.dao.entity.Department;
 import com.wtg.empdept_api.service.interfaces.IDepartmentService;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController()
-@RequestMapping("/api/v1/department")
+@RequestMapping("/department")
+@RequiredArgsConstructor
 public class DepartmentController {
 
-    @Autowired
-    private IDepartmentService departmentService;
+    private final IDepartmentService departmentService;
 
     @PostMapping
     public Department createDepartment(@RequestBody @NotNull Department department) {

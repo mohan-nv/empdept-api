@@ -3,17 +3,17 @@ package com.wtg.empdept_api.controller;
 import com.wtg.empdept_api.dao.entity.Employee;
 import com.wtg.empdept_api.service.interfaces.IEmployeeService;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController()
-@RequestMapping("/api/v1/employee")
+@RequestMapping("/employee")
+@RequiredArgsConstructor
 public class EmployeeController {
 
-    @Autowired
-    private IEmployeeService employeeService;
+    private final IEmployeeService employeeService;
 
     @PostMapping
     public Employee createEmployee(@RequestBody @NotNull Employee employee) {

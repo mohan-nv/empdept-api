@@ -5,7 +5,7 @@ import com.wtg.empdept_api.dao.entity.Employee;
 import com.wtg.empdept_api.dao.repository.DepartmentRepository;
 import com.wtg.empdept_api.service.interfaces.IDepartmentService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -14,10 +14,10 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DepartmentService implements IDepartmentService {
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private final DepartmentRepository departmentRepository;
 
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();

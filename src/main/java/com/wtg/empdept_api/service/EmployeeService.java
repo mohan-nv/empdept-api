@@ -6,7 +6,7 @@ import com.wtg.empdept_api.dao.repository.DepartmentRepository;
 import com.wtg.empdept_api.dao.repository.EmployeeRepository;
 import com.wtg.empdept_api.service.interfaces.IEmployeeService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +18,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeService implements IEmployeeService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private final DepartmentRepository departmentRepository;
 
     @Override
     public List<Employee> getAllEmployees() {
