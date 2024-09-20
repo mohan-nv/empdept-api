@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DepartmentService implements IDepartmentService {
@@ -31,7 +30,9 @@ public class DepartmentService implements IDepartmentService {
         if (department.getName() == null || department.getName().isEmpty()) {
             throw new InvalidParameterException("Department Name can't be null or empty");
         }
-        setDefaults(department);
+        if (department.getReadOnly() == null) {
+            department.setReadOnly(Boolean.FALSE);
+        }
 
         try {
             return departmentRepository.save(department);
@@ -48,9 +49,16 @@ public class DepartmentService implements IDepartmentService {
     @Override
     public Department updateDepartment(Department departmentRequest) throws EntityNotFoundException, UnsupportedOperationException {
         Department existingDepartment = getDepartmentById(departmentRequest.getId());
-        setDefaults(departmentRequest);
 
-        if (Boolean.TRUE.equals(departmentRequest.getReadOnly()) && Boolean.TRUE.equals(existingDepartment.getReadOnly())) {
+        if (existingDepartment.getReadOnly() && departmentRequest.getReadOnly() == null) {
+            throw new UnsupportedOperationException("Cannot modify a readonly department");
+        }
+
+        if (departmentRequest.getReadOnly() == null) {
+            departmentRequest.setReadOnly(Boolean.FALSE);
+        }
+
+        if (departmentRequest.getReadOnly() && existingDepartment.getReadOnly()) {
             throw new UnsupportedOperationException("Cannot modify a readonly department");
         }
 
@@ -71,10 +79,5 @@ public class DepartmentService implements IDepartmentService {
 
         departmentRepository.deleteById(id);
         return Boolean.TRUE;
-    }
-
-    private void setDefaults(Department department) {
-        department.setReadOnly(Optional.ofNullable(department.getReadOnly()).orElse(false));
-        department.setMandatory(Optional.ofNullable(department.getMandatory()).orElse(false));
     }
 }

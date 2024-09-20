@@ -23,5 +23,6 @@ public class Department {
     private Boolean readOnly;
 
     @Column(name = "MANDATORY")
-    private Boolean mandatory;
+    private Boolean mandatory = Boolean.FALSE;
+
 }
