@@ -44,14 +44,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department updateDepartment(Department departmentRequest) throws EntityNotFoundException, UnsupportedOperationException {
-        Department existingDepartment = getDepartmentById(departmentRequest.getId());
-
-        if (existingDepartment.getReadOnly() && departmentRequest.getReadOnly() == null) {
-            throw new UnsupportedOperationException("Cannot modify a readonly department");
-        }
-
         validateMandatoryFields(departmentRequest);
 
+        Department existingDepartment = getDepartmentById(departmentRequest.getId());
         if (departmentRequest.getReadOnly() && existingDepartment.getReadOnly()) {
             throw new UnsupportedOperationException("Cannot modify a readonly department");
         }
