@@ -1,13 +1,14 @@
 package com.wtg.mohanbootcamp.service;
 
 import com.wtg.mohanbootcamp.persistence.Department;
-import com.wtg.mohanbootcamp.persistence.Employee;
 import com.wtg.mohanbootcamp.persistence.DepartmentRepository;
+import com.wtg.mohanbootcamp.persistence.Employee;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.security.InvalidParameterException;
 import java.util.List;
@@ -27,12 +28,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department.getId() != null) {
             throw new UnsupportedOperationException("Please use update department if id already exist");
         }
-        if (department.getName() == null || department.getName().isEmpty()) {
-            throw new InvalidParameterException("Department Name can't be null or empty");
-        }
-        if (department.getReadOnly() == null) {
-            department.setReadOnly(Boolean.FALSE);
-        }
+        validateMandatoryFields(department);
 
         try {
             return departmentRepository.save(department);
@@ -54,9 +50,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             throw new UnsupportedOperationException("Cannot modify a readonly department");
         }
 
-        if (departmentRequest.getReadOnly() == null) {
-            departmentRequest.setReadOnly(Boolean.FALSE);
-        }
+        validateMandatoryFields(departmentRequest);
 
         if (departmentRequest.getReadOnly() && existingDepartment.getReadOnly()) {
             throw new UnsupportedOperationException("Cannot modify a readonly department");
@@ -83,5 +77,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         departmentRepository.deleteById(id);
         return Boolean.TRUE;
+    }
+
+    private void validateMandatoryFields(Department department) throws InvalidParameterException {
+        if (!StringUtils.hasLength(department.getName())) {
+            throw new InvalidParameterException("Department Name can't be null or empty");
+        }
+        if (department.getReadOnly() == null) {
+            throw new InvalidParameterException("Read Only can't be null or empty");
+        }
     }
 }

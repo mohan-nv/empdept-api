@@ -51,6 +51,7 @@ public class DepartmentServiceImplTests {
         // Arrange
         Department department = new Department();
         department.setName("IT");
+        department.setReadOnly(false);
 
         Mockito.when(departmentRepository.save(department)).thenReturn(department);
 

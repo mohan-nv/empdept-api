@@ -1,13 +1,14 @@
 package com.wtg.mohanbootcamp.service;
 
 import com.wtg.mohanbootcamp.persistence.Department;
-import com.wtg.mohanbootcamp.persistence.Employee;
 import com.wtg.mohanbootcamp.persistence.DepartmentRepository;
+import com.wtg.mohanbootcamp.persistence.Employee;
 import com.wtg.mohanbootcamp.persistence.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.security.InvalidParameterException;
 import java.util.HashSet;
@@ -73,10 +74,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     private void validateEmployeeNames(Employee employee) throws InvalidParameterException {
-        if (employee.getNameFirst() == null || employee.getNameFirst().isEmpty()) {
+        if (!StringUtils.hasLength(employee.getNameFirst())) {
             throw new InvalidParameterException("First Name can't be null or empty");
         }
-        if (employee.getNameLast() == null || employee.getNameLast().isEmpty()) {
+        if (!StringUtils.hasLength(employee.getNameLast())) {
             throw new InvalidParameterException("Last Name can't be null or empty");
         }
     }
