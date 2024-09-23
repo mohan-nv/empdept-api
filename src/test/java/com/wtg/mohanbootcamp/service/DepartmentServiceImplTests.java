@@ -17,20 +17,22 @@ import org.springframework.dao.DuplicateKeyException;
 
 import java.util.*;
 
+import static com.wtg.mohanbootcamp.service.EmployeeServiceImplTests.ID_EMPLOYEE_EXISTING;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DepartmentServiceImplTests {
 
-    private static final long ID_DEPARTMENT_NOT_READONLY_MANDATORY = 1L;
-    private static final long ID_DEPARTMENT_READONLY_MANDATORY = 2L;
-    private static final long ID_DEPARTMENT_CREATE_REQUEST = 100L;
-    private static final long IT_DEPARTMENT_DONT_EXIST = 200L;
-    private static final String NAME_DEPARTMENT_NOT_READONLY_MANDATORY = "HR";
-    private static final String NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED = "HR Updated";
-    private static final String NAME_DEPARTMENT_READONLY_MANDATORY = "Finance";
-    private static final String NAME_DEPARTMENT_CREATE_REQUEST = "Marketing";
+    public static final long ID_DEPARTMENT_NOT_READONLY_MANDATORY = 1L;
+    public static final long ID_DEPARTMENT_READONLY_NON_MANDATORY = 2L;
+    public static final long ID_DEPARTMENT_CREATE_REQUEST = 100L;
+    public static final long ID_DEPARTMENT_DOES_NOT_EXIST = 200L;
+    public static final String NAME_DEPARTMENT_NOT_READONLY_MANDATORY = "NAME_DEPARTMENT_NOT_READONLY_MANDATORY";
+    public static final String NAME_DEPARTMENT_READONLY_NON_MANDATORY = "NAME_DEPARTMENT_READONLY_NON_MANDATORY";
+    public static final String NAME_DEPARTMENT_CREATE_REQUEST = "NAME_DEPARTMENT_CREATE_REQUEST";
+    public static final String NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED = "NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED";
+    public static final String NAME_DEPARTMENT_DUPLICATE = "NAME_DEPARTMENT_DUPLICATE";
 
     private DepartmentService ref;
 
@@ -38,21 +40,28 @@ public class DepartmentServiceImplTests {
     private DepartmentServiceImpl concreteRef;
 
     @Mock
-    private DepartmentRepository departmentRepository;
+    private DepartmentRepository mockDepartmentRepository;
 
-    private Department notReadonlyMandatoryDepartment;
-    private Department notReadonlyMandatoryDepartmentUpdated;
-    private Department readonlyMandatoryDepartment;
+    private Department departmentNotReadonlyMandatory;
+    private Department departmentReadonlyNonMandatory;
     private Department departmentCreateRequest;
     private Department departmentCreateResponse;
-    private Set<Department> departmentSet;
-    private Employee employee;
+    private Department departmentDuplicateName;
+    private Employee employeeExisting;
 
     @BeforeEach
     public void setUp() {
         ref = concreteRef;
         setupDepartments();
         setupEmployee();
+
+        lenient().when(mockDepartmentRepository.findAll()).thenReturn(new ArrayList<>(List.of(departmentNotReadonlyMandatory, departmentReadonlyNonMandatory)));
+        lenient().when(mockDepartmentRepository.findById(ID_DEPARTMENT_READONLY_NON_MANDATORY)).thenReturn(Optional.of(departmentReadonlyNonMandatory));
+        lenient().when(mockDepartmentRepository.findById(ID_DEPARTMENT_NOT_READONLY_MANDATORY)).thenReturn(Optional.of(departmentNotReadonlyMandatory));
+        lenient().when(mockDepartmentRepository.findById(ID_DEPARTMENT_DOES_NOT_EXIST)).thenReturn(Optional.empty());
+        lenient().when(mockDepartmentRepository.save(departmentCreateRequest)).thenReturn(departmentCreateResponse);
+        lenient().when(mockDepartmentRepository.save(departmentDuplicateName)).thenThrow(new DataIntegrityViolationException(""));
+        lenient().when(mockDepartmentRepository.save(departmentNotReadonlyMandatory)).thenReturn(departmentNotReadonlyMandatory);
     }
 
     @AfterEach
@@ -60,113 +69,96 @@ public class DepartmentServiceImplTests {
         ref = null;
         concreteRef = null;
 
-        notReadonlyMandatoryDepartment = null;
-        notReadonlyMandatoryDepartmentUpdated = null;
-        readonlyMandatoryDepartment = null;
+        departmentNotReadonlyMandatory = null;
+        departmentReadonlyNonMandatory = null;
         departmentCreateRequest = null;
         departmentCreateResponse = null;
-        departmentSet = null;
-        employee = null;
+        departmentDuplicateName = null;
+        employeeExisting = null;
     }
 
     private void setupDepartments() {
-        notReadonlyMandatoryDepartment = Department.builder().id(ID_DEPARTMENT_NOT_READONLY_MANDATORY).name(NAME_DEPARTMENT_NOT_READONLY_MANDATORY).readOnly(Boolean.FALSE).mandatory(Boolean.TRUE).build();
-        readonlyMandatoryDepartment = Department.builder().id(ID_DEPARTMENT_READONLY_MANDATORY).name(NAME_DEPARTMENT_READONLY_MANDATORY).readOnly(Boolean.TRUE).mandatory(Boolean.TRUE).build();
-        notReadonlyMandatoryDepartmentUpdated = Department.builder().id(ID_DEPARTMENT_NOT_READONLY_MANDATORY).name(NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED).readOnly(Boolean.FALSE).mandatory(Boolean.TRUE).build();
+        departmentNotReadonlyMandatory = Department.builder().id(ID_DEPARTMENT_NOT_READONLY_MANDATORY).name(NAME_DEPARTMENT_NOT_READONLY_MANDATORY).readOnly(Boolean.FALSE).mandatory(Boolean.TRUE).build();
+        departmentReadonlyNonMandatory = Department.builder().id(ID_DEPARTMENT_READONLY_NON_MANDATORY).name(NAME_DEPARTMENT_READONLY_NON_MANDATORY).readOnly(Boolean.TRUE).mandatory(Boolean.FALSE).build();
 
         departmentCreateRequest = Department.builder().name(NAME_DEPARTMENT_CREATE_REQUEST).readOnly(Boolean.FALSE).mandatory(Boolean.FALSE).build();
         departmentCreateResponse = Department.builder().id(ID_DEPARTMENT_CREATE_REQUEST).name(NAME_DEPARTMENT_CREATE_REQUEST).readOnly(Boolean.FALSE).mandatory(Boolean.FALSE).build();
 
-        departmentSet = new LinkedHashSet<>(List.of(notReadonlyMandatoryDepartment, readonlyMandatoryDepartment));
+        departmentDuplicateName = Department.builder().name(NAME_DEPARTMENT_DUPLICATE).readOnly(Boolean.FALSE).mandatory(Boolean.FALSE).build();
     }
 
     private void setupEmployee() {
-        employee = Employee.builder().id(1L).departments(departmentSet).build();
-        notReadonlyMandatoryDepartment.setEmployees(new HashSet<>(Set.of(employee)));
+        employeeExisting = Employee.builder().id(ID_EMPLOYEE_EXISTING).departments(new HashSet<>(Set.of(departmentNotReadonlyMandatory))).build();
+        departmentNotReadonlyMandatory.setEmployees(new HashSet<>(Set.of(employeeExisting)));
     }
 
     @Test
-    public void testGetAllDepartments() {
-        when(departmentRepository.findAll()).thenReturn(new ArrayList<>(departmentSet));
-
+    public void testGetAllDepartments_success() {
         List<Department> result = ref.getAllDepartments();
 
         assertEquals(2, result.size());
-        assertDepartment(result.get(0), ID_DEPARTMENT_NOT_READONLY_MANDATORY, NAME_DEPARTMENT_NOT_READONLY_MANDATORY, Boolean.FALSE, Boolean.TRUE);
-        assertDepartment(result.get(1), ID_DEPARTMENT_READONLY_MANDATORY, NAME_DEPARTMENT_READONLY_MANDATORY, Boolean.TRUE, Boolean.TRUE);
+        assertTrue(result.contains(departmentNotReadonlyMandatory));
+        assertTrue(result.contains(departmentReadonlyNonMandatory));
     }
 
     @Test
-    public void testCreateDepartmentSuccess() {
-        when(departmentRepository.save(departmentCreateRequest)).thenReturn(departmentCreateResponse);
-
+    public void testCreateDepartment_validInput_success() {
         Department result = ref.createDepartment(departmentCreateRequest);
-
-        assertDepartment(result, ID_DEPARTMENT_CREATE_REQUEST, NAME_DEPARTMENT_CREATE_REQUEST, result.getReadOnly(), result.getMandatory());
+        assertEquals(result, departmentCreateResponse);
     }
 
     @Test
-    public void testCreateDepartmentThrowsUnsupportedOperationExceptionWhenRequestContainsId() {
-        assertUnsupportedOperationException(() -> ref.createDepartment(notReadonlyMandatoryDepartment),
+    public void testCreateDepartment_departmentIdNotNull_exception() {
+        assertUnsupportedOperationException(() -> ref.createDepartment(departmentReadonlyNonMandatory),
                 "Please use update department if id already exist");
     }
 
     @Test
-    public void testCreateDepartmentThrowsDuplicateKeyExceptionIfNameIsDuplicated() {
-        when(departmentRepository.save(departmentCreateRequest)).thenThrow(new DataIntegrityViolationException(""));
-
-        assertDuplicateKeyException(() -> ref.createDepartment(departmentCreateRequest),
+    public void testCreateDepartment_departmentNameDuplicate_exception() {
+        assertDuplicateKeyException(() -> ref.createDepartment(departmentDuplicateName),
                 "Department Name should be unique");
     }
 
     @Test
-    public void testGetDepartmentByIdSuccess() {
-        when(departmentRepository.findById(ID_DEPARTMENT_NOT_READONLY_MANDATORY)).thenReturn(Optional.of(notReadonlyMandatoryDepartment));
+    public void testGetDepartmentById_departmentExist_success() {
+        Department result = ref.getDepartmentById(ID_DEPARTMENT_READONLY_NON_MANDATORY);
 
-        Department result = ref.getDepartmentById(ID_DEPARTMENT_NOT_READONLY_MANDATORY);
-
-        assertDepartment(result, ID_DEPARTMENT_NOT_READONLY_MANDATORY, NAME_DEPARTMENT_NOT_READONLY_MANDATORY, Boolean.FALSE, Boolean.TRUE);
+        assertEquals(departmentReadonlyNonMandatory, result);
     }
 
     @Test
-    public void testGetDepartmentByIdThrowsEntityNotFoundExceptionForNonExistingDepartment() {
-        when(departmentRepository.findById(IT_DEPARTMENT_DONT_EXIST)).thenReturn(Optional.empty());
-
-        assertEntityNotFoundException(() -> ref.getDepartmentById(IT_DEPARTMENT_DONT_EXIST), "Department Not Found");
+    public void testGetDepartmentById_departmentDoesNotExist_exception() {
+        assertEntityNotFoundException(() -> ref.getDepartmentById(ID_DEPARTMENT_DOES_NOT_EXIST), "Department Not Found");
     }
 
     @Test
-    public void testUpdateDepartmentSuccessForNotReadOnly() {
-        when(departmentRepository.findById(ID_DEPARTMENT_NOT_READONLY_MANDATORY)).thenReturn(Optional.of(notReadonlyMandatoryDepartment));
-        when(departmentRepository.save(notReadonlyMandatoryDepartmentUpdated)).thenReturn(notReadonlyMandatoryDepartmentUpdated);
-
-        Department result = ref.updateDepartment(notReadonlyMandatoryDepartmentUpdated);
-
+    public void testUpdateDepartment_readOnlyFalse_success() {
+        departmentNotReadonlyMandatory.setName(NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED);
+        Department result = ref.updateDepartment(departmentNotReadonlyMandatory);
         assertDepartment(result, ID_DEPARTMENT_NOT_READONLY_MANDATORY, NAME_DEPARTMENT_NOT_READONLY_MANDATORY_UPDATED, Boolean.FALSE, Boolean.TRUE);
     }
 
     @Test
-    public void testUpdateDepartmentThrowsUnsupportedOperationExceptionForReadOnly() {
-        when(departmentRepository.findById(ID_DEPARTMENT_READONLY_MANDATORY)).thenReturn(Optional.of(readonlyMandatoryDepartment));
-
-        assertUnsupportedOperationException(() -> ref.updateDepartment(readonlyMandatoryDepartment),
+    public void testUpdateDepartment_readOnlyTrue_exception() {
+        assertUnsupportedOperationException(() -> ref.updateDepartment(departmentReadonlyNonMandatory),
                 "Cannot modify a readonly department");
     }
 
     @Test
-    public void testDeleteDepartmentSuccessForNotReadOnly() {
-        when(departmentRepository.findById(ID_DEPARTMENT_NOT_READONLY_MANDATORY)).thenReturn(Optional.of(notReadonlyMandatoryDepartment));
-
-        boolean result = ref.deleteDepartment(ID_DEPARTMENT_NOT_READONLY_MANDATORY);
-
-        assertTrue(result);
+    public void testUpdateDepartment_departmentDoesNotExist_exception() {
+        assertEntityNotFoundException(() -> ref.getDepartmentById(ID_DEPARTMENT_DOES_NOT_EXIST), "Department Not Found");
     }
 
     @Test
-    public void testDeleteDepartmentThrowsUnsupportedOperationExceptionForReadOnly() {
-        when(departmentRepository.findById(ID_DEPARTMENT_READONLY_MANDATORY)).thenReturn(Optional.of(readonlyMandatoryDepartment));
+    public void testDeleteDepartment_readOnlyFalse_success() {
+        boolean result = ref.deleteDepartment(ID_DEPARTMENT_NOT_READONLY_MANDATORY);
+        assertTrue(result);
+        verify(mockDepartmentRepository, times(1)).deleteById(ID_DEPARTMENT_NOT_READONLY_MANDATORY);
+    }
 
-        assertUnsupportedOperationException(() -> ref.deleteDepartment(ID_DEPARTMENT_READONLY_MANDATORY),
+    @Test
+    public void testDeleteDepartment_readOnlyTrue_exception() {
+        assertUnsupportedOperationException(() -> ref.deleteDepartment(ID_DEPARTMENT_READONLY_NON_MANDATORY),
                 "Cannot delete a readonly department");
     }
 

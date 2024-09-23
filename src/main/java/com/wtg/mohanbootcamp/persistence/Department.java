@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -31,6 +32,6 @@ public class Department {
     private Boolean mandatory;
 
     @ManyToMany(mappedBy = "departments")
-    private Set<Employee> employees;
+    private Set<Employee> employees = new HashSet<>();
 
 }
