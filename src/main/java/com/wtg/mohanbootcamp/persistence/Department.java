@@ -2,9 +2,7 @@ package com.wtg.mohanbootcamp.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Set;
 
@@ -13,6 +11,9 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties({"employees"})
 public class Department {
     @Id
@@ -27,7 +28,7 @@ public class Department {
     private Boolean readOnly;
 
     @Column(name = "MANDATORY")
-    private Boolean mandatory = Boolean.FALSE;
+    private Boolean mandatory;
 
     @ManyToMany(mappedBy = "departments")
     private Set<Employee> employees;

@@ -5,11 +5,13 @@ import com.wtg.mohanbootcamp.persistence.DepartmentRepository;
 import com.wtg.mohanbootcamp.persistence.Employee;
 import com.wtg.mohanbootcamp.persistence.EmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.security.InvalidParameterException;
 import java.util.HashSet;
@@ -20,10 +22,22 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class EmployeeServiceImplTests {
 
+    public static final Long ID_EMPLOYEE_EXISTING = 1L;
+    public static final Long ID_EMPLOYEE_NON_EXISTING = 100L;
+    public static final Long ID_DEPARTMENT_MANDATORY = 1L;
+    public static final Long ID_DEPARTMENT_NON_MANDATORY = 2L;
+    public static final String NAME_FIRST_EMPLOYEE_EXISTING = "Carl";
+    public static final String NAME_LAST_EMPLOYEE_EXISTING = "Sagan";
+    public static final String NAME_FIRST_NEW_EMPLOYEE = "CV";
+    public static final String NAME_LAST_NEW_EMPLOYEE = "Raman";
+
+    private EmployeeService ref;
+
     @InjectMocks
-    private EmployeeServiceImpl employeeService;
+    private EmployeeServiceImpl concreteRef;
 
     @Mock
     private EmployeeRepository employeeRepository;
@@ -31,76 +45,70 @@ public class EmployeeServiceImplTests {
     @Mock
     private DepartmentRepository departmentRepository;
 
-    private Employee employee;
-    private Department hrDepartment;
-    private Department financeDepartment;
+    private Employee existingEmployee;
+    private Employee newEmployeeRequest;
+    private Employee existingEmployeeUpdateRequest;
+    private Department mandatoryDepartment;
+    private Department nonMandatoryDepartment;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        ref = concreteRef;
+        setupDepartments();
+        setupEmployees();
+    }
 
-        // Initialize Departments
-        hrDepartment = new Department();
-        hrDepartment.setId(1L);
-        hrDepartment.setName("HR");
-        hrDepartment.setMandatory(true);
+    @AfterEach
+    public void tearDown() {
+        ref = null;
+        concreteRef = null;
 
-        financeDepartment = new Department();
-        financeDepartment.setId(2L);
-        financeDepartment.setName("Finance");
-        financeDepartment.setMandatory(false);
+        existingEmployee = null;
+        newEmployeeRequest = null;
+        existingEmployeeUpdateRequest = null;
+        mandatoryDepartment = null;
+        nonMandatoryDepartment = null;
+    }
 
-        Set<Department> departments = new HashSet<>();
-        departments.add(hrDepartment);
+    private void setupDepartments() {
+        mandatoryDepartment = Department.builder().id(ID_DEPARTMENT_MANDATORY).name("HR").readOnly(Boolean.FALSE).mandatory(Boolean.TRUE).build();
+        nonMandatoryDepartment = Department.builder().id(ID_DEPARTMENT_NON_MANDATORY).name("Finance").readOnly(Boolean.TRUE).mandatory(Boolean.FALSE).build();
+    }
 
-        // Initialize Employee
-        employee = new Employee();
-        employee.setId(1L);
-        employee.setNameFirst("John");
-        employee.setNameLast("Doe");
-        employee.setDepartments(departments);
+    private void setupEmployees() {
+        existingEmployee = Employee.builder().id(ID_EMPLOYEE_EXISTING).nameFirst(NAME_FIRST_EMPLOYEE_EXISTING).nameLast(NAME_LAST_EMPLOYEE_EXISTING).departments(Set.of(mandatoryDepartment)).build();
+        Set<Department> nonMandatoryDepartments = new HashSet<>();
+        nonMandatoryDepartments.add(nonMandatoryDepartment);
+        existingEmployeeUpdateRequest = Employee.builder().id(ID_EMPLOYEE_EXISTING).nameFirst(NAME_FIRST_EMPLOYEE_EXISTING).nameLast(NAME_LAST_EMPLOYEE_EXISTING).departments(nonMandatoryDepartments).build();
+        newEmployeeRequest = Employee.builder().nameFirst(NAME_FIRST_NEW_EMPLOYEE).nameLast(NAME_LAST_NEW_EMPLOYEE).build();
     }
 
     @Test
     public void testGetAllEmployees() {
-        // Arrange
-        when(employeeRepository.findAll()).thenReturn(List.of(employee));
+        when(employeeRepository.findAll()).thenReturn(List.of(existingEmployee));
 
-        // Act
-        List<Employee> result = employeeService.getAllEmployees();
+        List<Employee> result = ref.getAllEmployees();
 
-        // Assert
         assertEquals(1, result.size());
-        assertEquals("John", result.get(0).getNameFirst());
+        assertEquals(NAME_FIRST_EMPLOYEE_EXISTING, result.get(0).getNameFirst());
     }
 
     @Test
     public void testCreateEmployeeSuccess() {
-        // Arrange
-        Employee newEmployee = new Employee();
-        newEmployee.setNameFirst("Jane");
-        newEmployee.setNameLast("Smith");
+        when(departmentRepository.findByMandatory(true)).thenReturn(List.of(mandatoryDepartment));
+        when(employeeRepository.save(newEmployeeRequest)).thenReturn(newEmployeeRequest);
 
-        when(departmentRepository.findByMandatory(true)).thenReturn(List.of(hrDepartment));
-        when(employeeRepository.save(newEmployee)).thenReturn(newEmployee);
+        Employee result = ref.createEmployee(newEmployeeRequest);
 
-        // Act
-        Employee result = employeeService.createEmployee(newEmployee);
-
-        // Assert
         assertNotNull(result);
-        assertEquals("Jane", result.getNameFirst());
-        assertTrue(result.getDepartments().contains(hrDepartment));  // Mandatory department is added
+        assertEquals(NAME_FIRST_NEW_EMPLOYEE, result.getNameFirst());
+        assertTrue(result.getDepartments().contains(mandatoryDepartment));  // Mandatory department is added
     }
 
     @Test
     public void testCreateEmployeeThrowsUnsupportedOperationException() {
-        // Arrange
-        employee.setId(2L);
-
-        // Act & Assert
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            employeeService.createEmployee(employee);
+            ref.createEmployee(existingEmployee);
         });
 
         assertEquals("Please use update employee if id already exists", exception.getMessage());
@@ -108,25 +116,20 @@ public class EmployeeServiceImplTests {
 
     @Test
     public void testGetEmployeeByIdSuccess() {
-        // Arrange
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
+        when(employeeRepository.findById(ID_EMPLOYEE_EXISTING)).thenReturn(Optional.of(existingEmployee));
 
-        // Act
-        Employee result = employeeService.getEmployeeById(1L);
+        Employee result = ref.getEmployeeById(ID_EMPLOYEE_EXISTING);
 
-        // Assert
         assertNotNull(result);
-        assertEquals("John", result.getNameFirst());
+        assertEquals(NAME_FIRST_EMPLOYEE_EXISTING, result.getNameFirst());
     }
 
     @Test
     public void testGetEmployeeByIdThrowsEntityNotFoundException() {
-        // Arrange
-        when(employeeRepository.findById(1L)).thenReturn(Optional.empty());
+        when(employeeRepository.findById(ID_EMPLOYEE_NON_EXISTING)).thenReturn(Optional.empty());
 
-        // Act & Assert
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            employeeService.getEmployeeById(1L);
+            ref.getEmployeeById(ID_EMPLOYEE_NON_EXISTING);
         });
 
         assertEquals("Employee Not Found", exception.getMessage());
@@ -134,48 +137,35 @@ public class EmployeeServiceImplTests {
 
     @Test
     public void testUpdateEmployeeSuccess() {
-        // Arrange
-        Employee updatedEmployee = new Employee();
-        updatedEmployee.setId(1L);
-        updatedEmployee.setNameFirst("John");
-        updatedEmployee.setNameLast("Doe");
-        updatedEmployee.setDepartments(new HashSet<>(Set.of(financeDepartment)));
+        when(employeeRepository.findById(ID_EMPLOYEE_EXISTING)).thenReturn(Optional.of(existingEmployee));
+        when(departmentRepository.findAllById(Set.of(ID_DEPARTMENT_NON_MANDATORY))).thenReturn(List.of(nonMandatoryDepartment));
+        when(departmentRepository.findByMandatory(true)).thenReturn(List.of(mandatoryDepartment));
+        when(employeeRepository.save(existingEmployeeUpdateRequest)).thenReturn(existingEmployeeUpdateRequest);
 
-        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employee));
-        when(departmentRepository.findAllById(Set.of(2L))).thenReturn(List.of(financeDepartment));
-        when(departmentRepository.findByMandatory(true)).thenReturn(List.of(hrDepartment));
-        when(employeeRepository.save(updatedEmployee)).thenReturn(updatedEmployee);
+        Employee result = ref.updateEmployee(existingEmployeeUpdateRequest);
 
-        // Act
-        Employee result = employeeService.updateEmployee(updatedEmployee);
-
-        // Assert
         assertNotNull(result);
-        assertEquals("John", result.getNameFirst());
-        assertTrue(result.getDepartments().contains(hrDepartment));  // Mandatory department should still be present
+        assertEquals(NAME_FIRST_EMPLOYEE_EXISTING, result.getNameFirst());
+        assertTrue(result.getDepartments().contains(nonMandatoryDepartment));  // New department in request should be present
+        assertTrue(result.getDepartments().contains(mandatoryDepartment));  // Mandatory department should still be present
     }
 
     @Test
     public void testDeleteEmployeeSuccess() {
-        // Arrange
-        when(employeeRepository.existsById(1L)).thenReturn(true);
+        when(employeeRepository.existsById(ID_EMPLOYEE_EXISTING)).thenReturn(Boolean.TRUE);
 
-        // Act
-        boolean result = employeeService.deleteEmployee(1L);
+        boolean result = ref.deleteEmployee(ID_EMPLOYEE_EXISTING);
 
-        // Assert
         assertTrue(result);
-        verify(employeeRepository, times(1)).deleteById(1L);
+        verify(employeeRepository, times(1)).deleteById(ID_EMPLOYEE_EXISTING);
     }
 
     @Test
     public void testDeleteEmployeeThrowsEntityNotFoundException() {
-        // Arrange
-        when(employeeRepository.existsById(1L)).thenReturn(false);
+        when(employeeRepository.existsById(ID_EMPLOYEE_NON_EXISTING)).thenReturn(Boolean.FALSE);
 
-        // Act & Assert
         EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> {
-            employeeService.deleteEmployee(1L);
+            ref.deleteEmployee(ID_EMPLOYEE_NON_EXISTING);
         });
 
         assertEquals("Employee Not Found", exception.getMessage());
@@ -183,14 +173,10 @@ public class EmployeeServiceImplTests {
 
     @Test
     public void testCreateEmployeeThrowsInvalidParameterExceptionForEmptyFirstName() {
-        // Arrange
-        Employee invalidEmployee = new Employee();
-        invalidEmployee.setNameFirst("");
-        invalidEmployee.setNameLast("Doe");
+        newEmployeeRequest.setNameFirst("");
 
-        // Act & Assert
         InvalidParameterException exception = assertThrows(InvalidParameterException.class, () -> {
-            employeeService.createEmployee(invalidEmployee);
+            ref.createEmployee(newEmployeeRequest);
         });
 
         assertEquals("First Name can't be null or empty", exception.getMessage());

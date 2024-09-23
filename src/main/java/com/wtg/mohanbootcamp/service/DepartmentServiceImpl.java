@@ -81,5 +81,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (department.getReadOnly() == null) {
             throw new InvalidParameterException("Read Only can't be null or empty");
         }
+        if (department.getMandatory() == null) {
+            throw new InvalidParameterException("Mandatory can't be null or empty");
+        }
     }
 }
