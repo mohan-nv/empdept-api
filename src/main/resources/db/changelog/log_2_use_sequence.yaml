@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 5
+      author: mohannv
+      changes:
+        - createSequence:
+            sequenceName: seq_employee
+            startValue: 1
+            incrementBy: 1
+        - createSequence:
+            sequenceName: seq_department
+            startValue: 1
+            incrementBy: 1
+
+  # ChangeSet 6 not necessary in our case because H2 in-memory db is used
+  # In H2 in-memory database, ID always resets everytime application is terminated
+  - changeSet:
+      id: 6
+      author: mohannv
+      changes:
+        - sql:
+            dbms: h2
+            sql: "ALTER SEQUENCE seq_employee RESTART WITH (SELECT MAX(id) + 1 FROM employee);"
+
+  # ChangeSet 7 required due to Organisation department created with ID = 1
+  - changeSet:
+      id: 7
+      author: mohannv
+      changes:
+        - sql:
+            dbms: h2
+            sql: "ALTER SEQUENCE seq_department RESTART WITH (SELECT MAX(id) + 1 FROM department);"
+
+  - changeSet:
+      id: 8
+      author: mohannv
+      changes:
+        - modifyDataType:
+            tableName: employee
+            columnName: id
+            newDataType: BIGINT
+        - addAutoIncrement:
+            tableName: employee
+            columnName: id
+            columnDataType: BIGINT
+            incrementBy: 1
+            startWith: 1
+        - addDefaultValue:
+            tableName: employee
+            columnName: id
+            defaultValueSequenceNext: seq_employee
+
+  - changeSet:
+      id: 9
+      author: mohannv
+      changes:
+        - modifyDataType:
+            tableName: department
+            columnName: id
+            newDataType: BIGINT
+        - addAutoIncrement:
+            tableName: department
+            columnName: id
+            columnDataType: BIGINT
+            incrementBy: 1
+            startWith: 1
+        - addDefaultValue:
+            tableName: department
+            columnName: id
+            defaultValueSequenceNext: seq_department

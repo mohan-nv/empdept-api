@@ -1,0 +1,6 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/log_1_initial_schema.yaml
+
+  - include:
+      file: db/changelog/log_2_use_sequence.yaml

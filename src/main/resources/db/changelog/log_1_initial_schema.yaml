@@ -1,0 +1,105 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: mohannv
+      changes:
+        - createTable:
+            tableName: employee
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT AUTO_INCREMENT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name_first
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name_last
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+
+  - changeSet:
+      id: 2
+      author: mohannv
+      changes:
+        - createTable:
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT AUTO_INCREMENT
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: read_only
+                  type: TINYINT
+                  defaultValue: 0
+              - column:
+                  name: mandatory
+                  type: TINYINT
+                  defaultValue: 0
+
+  - changeSet:
+      id: 3
+      author: mohannv
+      changes:
+        - createTable:
+            tableName: map_employee_department
+            columns:
+              - column:
+                  name: id_employee
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: id_department
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+            constraints:
+              primaryKey:
+                columnNames: id_employee, id_department
+        - addForeignKeyConstraint:
+            baseTableName: map_employee_department
+            baseColumnNames: id_employee
+            referencedTableName: employee
+            referencedColumnNames: id
+            constraintName: fk_map_employee_department_id_employee
+        - addForeignKeyConstraint:
+            baseTableName: map_employee_department
+            baseColumnNames: id_department
+            referencedTableName: department
+            referencedColumnNames: id
+            constraintName: fk_map_employee_department_id_department
+
+  - changeSet:
+      id: 4
+      author: mohannv
+      changes:
+        - insert:
+            tableName: department
+            columns:
+              - column:
+                  name: id
+                  value: 1
+              - column:
+                  name: name
+                  value: 'Organisation'
+              - column:
+                  name: read_only
+                  value: 1
+              - column:
+                  name: mandatory
+                  value: 1
