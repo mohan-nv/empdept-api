@@ -39,12 +39,6 @@ databaseChangeLog:
             tableName: employee
             columnName: id
             newDataType: BIGINT
-        - addAutoIncrement:
-            tableName: employee
-            columnName: id
-            columnDataType: BIGINT
-            incrementBy: 1
-            startWith: 1
         - addDefaultValue:
             tableName: employee
             columnName: id
@@ -58,12 +52,6 @@ databaseChangeLog:
             tableName: department
             columnName: id
             newDataType: BIGINT
-        - addAutoIncrement:
-            tableName: department
-            columnName: id
-            columnDataType: BIGINT
-            incrementBy: 1
-            startWith: 1
         - addDefaultValue:
             tableName: department
             columnName: id
